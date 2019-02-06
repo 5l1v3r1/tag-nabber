@@ -1,2 +1,2 @@
-# tag-nabber
+# Tag Nabber
 A Burp Suite extension for identifying anchor tags and other potential sources of Tabnabbing.
