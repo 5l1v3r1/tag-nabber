@@ -1,0 +1,18 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>The main page</title>
+
+
+</head>
+<html>
+ <body>
+		<h1> This is the homepage with a malicious link.<h1>
+  <li><a href="//localhost:8002/link.html" target="_blank">Vulnerable target using html link to open the new page</a></li>
+  <li><a href="//localhost:8002/link.html" rel="noopener">Vulnerable target using html link to open the new page</a></li>
+  <button onclick="window.open('//localhost:8002/link.html')">Vulnerable target using javascript to open the new page</button>
+ </body>
+</html>
