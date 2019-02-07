@@ -156,42 +156,6 @@ Copyright (c) 2018 SolomonSklash""")
             except:
                 self._stderr.println("Failed to append issue.")
 
-        # Parse matches for missing SRI attribute and create corresponding issue
-        # try:
-        #     for match in matches:
-        #         try:  # check if resource is being loaded from 3rd party
-        #             if domain.lower() not in match.lower():
-        #                 thirdPartyResult = compiledIntegrityRegex.search(match)
-
-        #                 # check for relative paths, i.e. no http/https
-        #                 relativePathResult = compiledRelativePathRegex.search(match)
-
-        #                 # process 3rd party resources
-        #                 if thirdPartyResult is None and relativePathResult is not None:
-        #                     if DEBUG and thirdPartyResult:
-        #                         for result in thirdPartyResult:
-        #                             print("DEBUG:    doPassiveScan() 3rd party result")
-        #                             print("DEBUG:    " + str(result))
-
-        #                     # Get offsets for highlighting response in issue detail
-        #                     try:
-        #                         offset = self._get_matches(baseRequestResponse.getResponse(), match)
-        #                     except:
-        #                         self._stderr.println("Failed to get match offset.")
-        #                     # Append new issues
-        #                     try:
-        #                         issues.append(SRIScanIssue(
-        #                             baseRequestResponse.getHttpService(),
-        #                             self._helpers.analyzeRequest(baseRequestResponse).getUrl(),
-        #                             [self._callbacks.applyMarkers(baseRequestResponse, None, offset)]
-        #                         ))
-        #                     except:
-        #                         self._stderr.println("Failed to append issue.")
-        #         except:
-        #             self._stderr.println("Failed to match against domain.")
-        # except:
-        #     self._stderr.println("Failed to print matches.")
-
         if len(issues) > 0:
             return issues
 
