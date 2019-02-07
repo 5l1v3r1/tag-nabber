@@ -89,21 +89,20 @@ Copyright (c) 2018 SolomonSklash""")
 
         try:
             targetMatch = compiledTargetRegex.findall(self._helpers.bytesToString(response))
-            relMatch = compiledRelRegex.findall(self._helpers.bytesToString(response))
+            # relMatch = compiledRelRegex.findall(self._helpers.bytesToString(response))
         except:
             self._stderr.println("Failed to run regexes.")
 
         try:
             for match in targetMatch:
-                matches.append(match)
                 if DEBUG:
                     print("DEBUG:    regexResponseParse() script regex match")
                     print("DEBUG:    " + str(match))
-            for match in relMatch:
-                matches.append(match)
-                if DEBUG:
-                    print("DEBUG:    regexResponseParse() link regex match")
-                    print("DEBUG:    " + str(match))
+
+                if "noreferrer" not in match and "noopener" not in match:
+                    print("NOT FOUND, RAISE ISSUE!!!!!!!")
+                    matches.append(match)
+
         except:
             self._stderr.println("Failed to iterate through matches.")
 
@@ -131,7 +130,8 @@ Copyright (c) 2018 SolomonSklash""")
         MIMETypes = ["HTML", "script", "text"]
 
         if MIME not in MIMETypes:
-            exit
+            print "Exiting due to improper MIME Type"
+            return None
 
         issues = list()
 
