@@ -137,12 +137,24 @@ Copyright (c) 2018 SolomonSklash""")
 
         # Parse response for <a> tags
         try:
-            print("Calling regexResponseParse!")
             matches = self.regexResponseParse(baseRequestResponse)
         except:
             self._stderr.println("Failed to get regex matches.")
 
+        for match in matches:
+            # Get offsets for highlighting response in issue detail
+            try:
+                offset = self._get_matches(baseRequestResponse.getResponse(), match)
+            except:
+                self._stderr.println("Failed to get match offset.")
 
+            try:
+                issues.append(SRIScanIssue(baseRequestResponse.getHttpService(),
+                                           self._helpers.analyzeRequest(baseRequestResponse).getUrl(),
+                                           [self._callbacks.applyMarkers(baseRequestResponse, None, offset)]
+                                          ))
+            except:
+                self._stderr.println("Failed to append issue.")
 
         # Parse matches for missing SRI attribute and create corresponding issue
         # try:
