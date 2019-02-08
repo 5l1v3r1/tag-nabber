@@ -21,23 +21,21 @@ VERSION = '0.0.1'
 DEBUG = 1
 
 # Pre-compile regexes
-targetRegex=r"(?i)\<\s?a\s?[^\>]*target\s?=\s?[\"|\']\s?_blank\s?[\"|\'][^\>]*\>"
-relRegex=r"(?i)\<\s?a\s?[^\>]*\s?rel\s?=\s?[\"|\']\s?(noreferrer|noopener)?(noopener noreferrer)?\s?[\"|\'][^\>]*\>"
+TARGET_REGEX = r"(?i)\<\s?a\s?[^\>]*target\s?=\s?[\"|\']\s?_blank\s?[\"|\'][^\>]*\>"
 
 try:
-    compiledTargetRegex = re.compile(targetRegex)
-    compiledRelRegex = re.compile(relRegex)
+    COMPILED_TARGET_REGEX = re.compile(TARGET_REGEX)
 except:
-    print("Failed to compile regexes.")
+    print "Failed to compile regexes."
 
 # Inherit IBurpExtender as base class, which defines registerExtenderCallbacks
 # Inherit IScannerCheck to register as custom scanner
 
 class BurpExtender(IBurpExtender, IScannerCheck):
-
+    """ Primary Burp extension class."""
     # get references to callbacks, called when extension is loaded
     def registerExtenderCallbacks(self, callbacks):
-
+        """Get references to callback utility functions."""
         # get a local instance of callbacks object
         self._callbacks = callbacks
         self._callbacks.setExtensionName("Tag Nabber")
@@ -59,27 +57,28 @@ Copyright (c) 2018 SolomonSklash""")
 
     # Get matches for highlighting locations in responses
     # See https://github.com/PortSwigger/example-scanner-checks/blob/master/python/CustomScannerChecks.py
-    def _get_matches(self, response, match):
+    def _get_matches(self, response, result):
         matches = []
         start = 0
         reslen = len(response)
-        matchlen = len(match)
+        matchlen = len(result)
         while start < reslen:
-            start = self._helpers.indexOf(response, match, True, start, reslen)
+            start = self._helpers.indexOf(response, result, True, start, reslen)
             if start == -1:
                 break
             matches.append(array('i', [start, start + matchlen]))
             start += matchlen
 
         if DEBUG:
-            print("DEBUG:    _get_matches() array locations")
+            print"DEBUG:    _get_matches() array locations"
             for match in matches:
-                print ("DEBUG:    " + str(match))
+                print "DEBUG:    " + str(match)
         return matches
 
     # Parse response for anchor tags
-    def regexResponseParse(self, baseRequestResponse):
-        print("In regexResponseParse!")
+    def PARSE_REGEX_RESPONSE(self, baseRequestResponse):
+        """Parse HTTP response for regex match."""
+        print "In PARSE_REGEX_RESPONSE!"
         matches = []
 
         try:
@@ -88,19 +87,18 @@ Copyright (c) 2018 SolomonSklash""")
             self._stderr.println("Failed to get response.")
 
         try:
-            targetMatch = compiledTargetRegex.findall(self._helpers.bytesToString(response))
-            # relMatch = compiledRelRegex.findall(self._helpers.bytesToString(response))
+            target_match = COMPILED_TARGET_REGEX.findall(self._helpers.bytesToString(response))
         except:
             self._stderr.println("Failed to run regexes.")
 
         try:
-            for match in targetMatch:
+            for match in target_match:
                 if DEBUG:
-                    print("DEBUG:    regexResponseParse() script regex match")
-                    print("DEBUG:    " + str(match))
+                    print "DEBUG:    PARSE_REGEX_RESPONSE() script regex match"
+                    print "DEBUG:    " + str(match)
 
                 if "noreferrer" not in match and "noopener" not in match:
-                    print("NOT FOUND, RAISE ISSUE!!!!!!!")
+                    print "NOT FOUND, RAISE ISSUE!!!!!!!"
                     matches.append(match)
 
         except:
@@ -115,21 +113,21 @@ Copyright (c) 2018 SolomonSklash""")
     # baseRequestResponse)
 
     def doPassiveScan(self, baseRequestResponse):
-
-        # Get MIME type of response
+        """Run passive scan check."""
+        # Get MIME Type of response
         try:
             response = self._helpers.analyzeResponse(baseRequestResponse.getResponse())
-            MIME = response.getStatedMimeType()
+            mime = response.getStatedMimeType()
             if DEBUG:
-                print("DEBUG:    MIME type")
-                print("DEBUG:    " + str(MIME))
+                print "DEBUG:    mime type"
+                print "DEBUG:    " + str(mime)
         except:
-            self._stderr.println("Failed to get MIME type.")
+            self._stderr.println("Failed to get mime type.")
 
         # MIME types to check for script and link tags
-        MIMETypes = ["HTML", "script", "text"]
+        mime_types = ["HTML", "script", "text"]
 
-        if MIME not in MIMETypes:
+        if mime not in mime_types:
             print "Exiting due to improper MIME Type"
             return None
 
@@ -137,7 +135,7 @@ Copyright (c) 2018 SolomonSklash""")
 
         # Parse response for <a> tags
         try:
-            matches = self.regexResponseParse(baseRequestResponse)
+            matches = self.PARSE_REGEX_RESPONSE(baseRequestResponse)
         except:
             self._stderr.println("Failed to get regex matches.")
 
@@ -156,7 +154,7 @@ Copyright (c) 2018 SolomonSklash""")
             except:
                 self._stderr.println("Failed to append issue.")
 
-        if len(issues) > 0:
+        if issues:
             return issues
 
         return None
@@ -183,6 +181,7 @@ Copyright (c) 2018 SolomonSklash""")
 
 
 class SRIScanIssue(IScanIssue):
+    """Scan issue class."""
     # constructor for setting issue information
     def __init__(self, httpService, url, requestResponse):
         self._httpService = httpService
