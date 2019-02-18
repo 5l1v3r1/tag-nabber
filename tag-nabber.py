@@ -14,6 +14,9 @@ try:
     from java.io import PrintWriter
     from array import array
     import re
+    # Makes exceptions prettier
+    from exceptions_fix import FixBurpExceptions
+    import sys
 except ImportError:
     print "Failed to load dependencies."
 
@@ -53,10 +56,13 @@ Copyright (c) 2018 SolomonSklash""")
         if DEBUG:
             self._stdout.println("\n\nDEBUG enabled!")
 
+        # Makes exceptions prettier
+        sys.stdout = callbacks.getStdout()
+
         return
 
     # Get matches for highlighting locations in responses
-    # See https://github.com/PortSwigger/example-scanner-checks/blob/master/python/CustomScannerChecks.py
+    # https://github.com/PortSwigger/example-scanner-checks/blob/master/python/CustomScannerChecks.py
     def _get_matches(self, response, result):
         matches = []
         start = 0
@@ -204,38 +210,35 @@ class SRIScanIssue(IScanIssue):
         return 'Firm'
 
     def getIssueBackground(self):
-        return "Third-party libraries and scripts, such as Bootstrap, Angular, and jQuery " \
-               "are commonly included from remote, potentially untrusted servers and CDNs. " \
-               "Subresource Integrity is a mechanism that verifies each time a resource is fetched, " \
-               "it matches a known good version and has not been tampered with. If Subresource " \
-               "Integrity has not been implemented, attackers could make malicious changes to a " \
-               "remote resource and compromise any site that includes the resource, as well as any " \
-               "users of the affected site."
+        return "Tabnabbing occurs when a page opens a link using the target=\"_blank\" " \
+            "attribute within an anchor HTML tag, while omitting the rel=\"noreferrer\" " \
+            "or rel=\"noopener\" attributes. This method of opening a new tab or window " \
+            "preserves a reference to the parent window/tab's window.opener Javascript " \
+            "object, allowing the child window/tab to modify this value and change the " \
+            "parent's URL while focus is on the child, thus \"nabbing\" the parent. This " \
+            "method can be very effective when combined with a fake phishing site that " \
+            "resembles the parent's original page. Applications allowing the embedding " \
+            "of user-controlled links should be especially aware of this issue."
 
     def getRemediationBackground(self):
-        return "https://scotthelme.co.uk/subresource-integrity/<br>" \
-               "https://report-uri.com/home/sri_hash<br>" \
-               "https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity<br>" \
-               "https://www.w3.org/TR/SRI/"
+        return "https://www.owasp.org/index.php/Reverse_Tabnabbing<br>" \
+               "https://github.com/OWASP/CheatSheetSeries/blob/master/cheatsheets/HTML5_Security_Cheat_Sheet.md#tabnabbing<br>" \
+               "https://mathiasbynens.github.io/rel-noopener/<br>" \
+               "https://www.netsparker.com/blog/web-security/tabnabbing-protection-bypass/"
 
     def getIssueDetail(self):
-        description = "A script or stylesheet is missing the Subresource Integrity attribute."
+        description = "An anchor or link tag uses the target=\"_blank\" attribute without also " \
+                      " including either the rel=\"noreferrer\" or rel=\"noopener\" attribute."
         return description
 
     def getRemediationDetail(self):
-        return "Subresource Integrity should be used any time scripts or stylesheets are fetched " \
-               "from a third-party source. The 'integrity' attribute is included any time a " \
-               "<script> or <link> HTML tag is used, e.g. <script src='https://example.com/example" \
-               "-framework.js' integrity='sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQh" \
-               "o1wx4JwY8wC' crossorigin='anonymous'></script> The 'crossorigin' attribute is included " \
-               "to indicate that no credentials are needed in order fetch the resource. In order to " \
-               "generate the hash of the requested file, the following Linux command can be used on the " \
-               "resource file: 'shasum -b -a [256,384,512] FILENAME.js | xxd -r -p | base64'. In " \
-               "addition, two Content Security Policy header directives can be used to enforce the use " \
-               "of SRI on scripts and stylesheets: 'require-sri-for script' and 'require-sri-for style'."
+        return "Ensure that any anchor tags using the target=\"_blank\" attribute also include either or both of the rel=\"noreferrer\" and rel=\"noopener\" tags."
 
     def getHttpMessages(self):
         return self._requestResponse
 
     def getHttpService(self):
         return self._httpService
+
+# Make exceptions prettier
+FixBurpExceptions()
