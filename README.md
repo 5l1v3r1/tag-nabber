@@ -12,3 +12,4 @@ A Burp Suite extension for identifying anchor tags and other potential sources o
 * Add regex for window.open
 
 ### Screenshots
+![Example Issue](screenshots/screenshot01.png)
